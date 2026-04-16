@@ -15,6 +15,18 @@ type SignupData = {
   confirmPassword: string;
 };
 
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return fallback;
+};
+
 const Signup = (): ReactElement => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -62,8 +74,8 @@ const Signup = (): ReactElement => {
 
       alert("Account created successfully! Please check your email for verification.");
       navigate("/login");
-    } catch (error: any) {
-      alert(error.message || "Failed to create account");
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, "Failed to create account"));
     } finally {
       setLoading(false);
     }

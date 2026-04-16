@@ -1,6 +1,6 @@
 import { useState, useEffect, type ChangeEvent, type ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { apiFetch } from "../lib/api";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaFacebook, FaGoogle, FaMicrosoft } from "react-icons/fa";
@@ -10,6 +10,18 @@ import Button from "../components/ui/login/Button";
 type LoginData = {
   username: string;
   password: string;
+};
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return fallback;
 };
 
 const Login = (): ReactElement => {
@@ -52,9 +64,9 @@ const Login = (): ReactElement => {
 
       console.log("Navigating to dashboard...");
       navigate("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login attempt failed:", error);
-      alert(error.message || "Login failed");
+      alert(getErrorMessage(error, "Login failed"));
     } finally {
       setLoading(false);
     }

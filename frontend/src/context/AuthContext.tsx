@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState } from "react";
 import type { ReactNode } from "react";
 
 interface User {
@@ -21,27 +21,28 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const getStoredAuth = (): { user: User | null; token: string | null } => {
+  const savedUser = localStorage.getItem("ae_user");
+  const savedToken = localStorage.getItem("ae_token");
+
+  if (!savedUser || !savedToken) {
+    return { user: null, token: null };
+  }
+
+  try {
+    return { user: JSON.parse(savedUser) as User, token: savedToken };
+  } catch (error) {
+    console.error("Failed to parse saved user from localStorage:", error);
+    localStorage.removeItem("ae_user");
+    localStorage.removeItem("ae_token");
+    return { user: null, token: null };
+  }
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem("ae_user");
-    const savedToken = localStorage.getItem("ae_token");
-
-    if (savedUser && savedToken) {
-      try {
-        setUser(JSON.parse(savedUser));
-        setToken(savedToken);
-      } catch (error) {
-        console.error("Failed to parse saved user from localStorage:", error);
-        localStorage.removeItem("ae_user");
-        localStorage.removeItem("ae_token");
-      }
-    }
-    setIsLoading(false);
-  }, []);
+  const storedAuth = getStoredAuth();
+  const [user, setUser] = useState<User | null>(storedAuth.user);
+  const [token, setToken] = useState<string | null>(storedAuth.token);
 
   const login = (newUser: User, newToken: string) => {
     setUser(newUser);
@@ -62,7 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         user,
         token,
-        isLoading,
+        isLoading: false,
         login,
         logout,
         isLoggedIn: !!user,
@@ -73,10 +74,4 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export default AuthContext;
