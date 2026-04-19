@@ -1,18 +1,46 @@
-// import DesignCourses from "./pages/DesignCourses"
- import SingleCourse from "./pages/SingleCourse"
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Navbar from "./components/ui/learning-cohorts/Navbar";
+import Footer from "./components/ui/Footer";
+
+// Public Pages
+import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+import LearningCohort from "./pages/LearningCohort";
+import ModulesPage from "./pages/ModulesPage";
+import ProductsPage from "./pages/ProductsPage";
+import TestimonialsPage from "./pages/TestimonialsPage";
+import ContactPage from "./pages/ContactPage";
+
+// Generic Pages included initially
+import Guru from "./pages/Guru";
+import GuruCircle from "./pages/GuruCircle";
+
+// Auth Pages
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import DashboardPage from "./pages/DashboardPage";
+import ModuleDetailPage from "./pages/ModuleDetailPage";
+import QuizPage from "./pages/QuizPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageModules from "./pages/admin/ManageModules";
+import ManageQuizzes from "./pages/admin/ManageQuizzes";
+import ManageProducts from "./pages/admin/ManageProducts";
+import ManageTestimonials from "./pages/admin/ManageTestimonials";
+import ManageTeam from "./pages/admin/ManageTeam";
+import ViewUsers from "./pages/admin/ViewUsers";
+
 
 function App() {
   return (
-    <>
-      {/* <DesignCourses/> */}
-      <SingleCourse />
-    </>
-  )
-}
     <AuthProvider>
       <BrowserRouter>
         <Navbar />
-
+       
         <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<HomePage />} />
@@ -119,10 +147,11 @@ function App() {
             }
           />
         </Routes>
+         <Footer />
+
       </BrowserRouter>
     </AuthProvider>
   );
->>>>>>> b927104c09e6d838a5a2bd72651a0b41cfb9fb81
 }
 
 export default App;
