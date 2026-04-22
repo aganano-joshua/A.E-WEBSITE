@@ -1,5 +1,7 @@
 const { spawnSync } = require('node:child_process');
 
+require('dotenv').config();
+
 function run(command, args) {
   const result = spawnSync(command, args, {
     stdio: 'inherit',
@@ -18,4 +20,4 @@ if (!process.env.DATABASE_URL) {
   process.exit(0);
 }
 
-run('npx', ['prisma', 'db', 'push', '--skip-generate']);
+run('npx', ['prisma', 'db', 'push']);

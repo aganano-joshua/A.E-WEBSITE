@@ -4,6 +4,9 @@
 # Keep only these folders in scope.
 !/backend/
 !/frontend/
+!/.github/
+!/.github/workflows/
+!/.github/workflows/backend-mirror-sync.yml
 
 # Keep this file tracked.
 !/.gitignore

@@ -79,3 +79,31 @@ npm run dev
 - Folders: lowercase and clear names (`features`, `middlewares`, `config`)
 - Files: kebab-case (`error-handler.ts`, `prisma-client.ts`)
 - Code symbols: camelCase (`usersService`, `startServer`)
+
+## Backend Mirror Repo Sync
+
+This backend can be mirrored to a separate Git repository while still living in this monorepo.
+
+### Manual Sync
+
+From the `backend/` folder:
+
+```bash
+export BACKEND_MIRROR_REPO_URL="git@github.com:your-org/your-backend-repo.git"
+export BACKEND_MIRROR_BRANCH="main"
+yarn sync:mirror
+```
+
+The script copies `backend/` contents to the target repo root and pushes only when changes exist.
+
+### Automatic Sync (GitHub Actions)
+
+Workflow file: `.github/workflows/backend-mirror-sync.yml`
+
+Create these repository secrets in the monorepo:
+
+- `BACKEND_MIRROR_REPO`: target repo path, for example `your-org/your-backend-repo`
+- `BACKEND_MIRROR_TOKEN`: GitHub token with push access to target repo
+- `BACKEND_MIRROR_BRANCH` (optional): defaults to `main`
+
+When any `backend/**` file changes and you push, the workflow syncs backend content to the separate repo automatically.

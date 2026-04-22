@@ -13,7 +13,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:push": "prisma db push",
-    "db:push:skip-generate": "prisma db push --skip-generate"
+    "db:push:deploy": "prisma db push",
+    "sync:mirror": "sh ./scripts/sync-backend-mirror.sh"
   },
   "keywords": [],
   "author": "",

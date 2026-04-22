@@ -1,0 +1,67 @@
+name: Backend Mirror Sync
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - feat/**
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-mirror-sync.yml'
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare mirror repo
+        env:
+          TARGET_REPO: ${{ secrets.BACKEND_MIRROR_REPO }}
+          TARGET_BRANCH: ${{ secrets.BACKEND_MIRROR_BRANCH }}
+          TARGET_TOKEN: ${{ secrets.BACKEND_MIRROR_TOKEN }}
+        run: |
+          if [ -z "$TARGET_REPO" ] || [ -z "$TARGET_TOKEN" ]; then
+            echo "Missing required secrets BACKEND_MIRROR_REPO or BACKEND_MIRROR_TOKEN"
+            exit 1
+          fi
+
+          BRANCH="${TARGET_BRANCH:-main}"
+          REMOTE_URL="https://x-access-token:${TARGET_TOKEN}@github.com/${TARGET_REPO}.git"
+
+          git clone --depth 1 --branch "$BRANCH" "$REMOTE_URL" mirror
+
+      - name: Sync backend into mirror root
+        run: |
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'dist' \
+            backend/ mirror/
+
+      - name: Commit and push mirror changes
+        env:
+          TARGET_BRANCH: ${{ secrets.BACKEND_MIRROR_BRANCH }}
+        run: |
+          BRANCH="${TARGET_BRANCH:-main}"
+
+          cd mirror
+          git config user.name "backend-mirror-bot"
+          git config user.email "backend-mirror-bot@users.noreply.github.com"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "sync: backend from monorepo ${GITHUB_SHA}"
+            git push origin "$BRANCH"
+            echo "Mirror sync pushed."
+          else
+            echo "No mirror changes to push."
+          fi
