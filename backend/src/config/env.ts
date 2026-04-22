@@ -35,10 +35,10 @@ export const env = {
   isProduction,
   port: Number(process.env.PORT ?? 5050),
   appBaseUrl: process.env.APP_BASE_URL ?? "http://localhost:5050",
-  clientBaseUrl: process.env.CLIENT_BASE_URL ?? "http://localhost:3000",
+  clientBaseUrl: process.env.CLIENT_BASE_URL ?? "http://localhost:5173",
   databaseUrl: process.env.DATABASE_URL as string,
   corsOrigin: process.env.CORS_ORIGIN?.split(",").map((origin) => origin.trim()) ?? [
-    "http://localhost:3000"
+    "http://localhost:5173/"
   ],
   accessTokenSecret: getEnvValue(
     "ACCESS_TOKEN_SECRET",

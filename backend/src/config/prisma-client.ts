@@ -9,6 +9,36 @@ const globalForPrisma = globalThis as unknown as {
   prismaAdapter?: PrismaPg;
 };
 
+function shouldUseSsl(connectionString: string): boolean {
+  const url = new URL(connectionString);
+  const sslMode = url.searchParams.get("sslmode")?.toLowerCase();
+  const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+
+  if (sslMode === "disable") {
+    return false;
+  }
+
+  if (sslMode === "require" || sslMode === "verify-ca" || sslMode === "verify-full") {
+    return true;
+  }
+
+  if (process.env.PGSSLMODE?.toLowerCase() === "disable") {
+    return false;
+  }
+
+  if (process.env.PGSSLMODE?.toLowerCase() === "require") {
+    return true;
+  }
+
+  if (process.env.DATABASE_SSL?.toLowerCase() === "true") {
+    return true;
+  }
+
+  // Default behavior: local databases usually run without TLS, while hosted
+  // PostgreSQL providers typically require TLS regardless of NODE_ENV.
+  return !isLocalHost;
+}
+
 // Neon-optimized pool configuration
 // Neon pooler endpoint already handles connection pooling,
 // so we use modest settings to avoid overwhelming it
@@ -16,9 +46,11 @@ const pgPool =
   globalForPrisma.pgPool ??
   new Pool({
     connectionString: env.databaseUrl,
-    ssl: {
-      rejectUnauthorized: false
-    },
+    ssl: shouldUseSsl(env.databaseUrl)
+      ? {
+          rejectUnauthorized: false
+        }
+      : undefined,
     max: 5, // Small pool - Neon's pooler handles the rest
     min: 1,
     idleTimeoutMillis: 120000, // 2 minutes - longer for Neon
